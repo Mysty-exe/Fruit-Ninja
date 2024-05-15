@@ -1,6 +1,6 @@
 import pygame
 import random
-from helpers import add_decimal, sub_decimal
+from helpers import add_decimal, sub_decimal, rotate
 
 class Fruit:
 
@@ -10,18 +10,25 @@ class Fruit:
     spawnY = 850
     minVelocityX, maxVelocityX = -2, 2
     minVelocityY, maxVelocityY = 18, 23
-
+    minRotate, maxRotate = -4, 4
+    
     def __init__(self, fruit):
         size = random.randrange(self.minSize, self.maxSize)
         self.fruit = pygame.image.load("Assets\\Fruits\\" + fruit + ".png").convert_alpha()
         self.fruit = pygame.transform.scale(self.fruit, (size, size))
+        self.fruit_copy = self.fruit.copy()
         self.rect = self.fruit.get_rect()
         self.rect.x, self.rect.y = random.randrange(self.minSpawnX, self.maxSpawnX), self.spawnY
         self.mask = pygame.mask.from_surface(self.fruit)
         self.velocityX = random.randrange(self.minVelocityX, self.maxVelocityX)
         self.velocityY = random.randrange(self.minVelocityY, self.maxVelocityY)
         self.stayAtPeakTimer = 5
+        self.rotateSpeed = random.randrange(self.minRotate, self.maxRotate)
+        self.currentRotate = 0
         self.gravity = 0.1
+
+    def draw(self, surface):
+        surface.blit(self.fruit, self.rect)
 
     def move(self):
         self.rect.x += self.velocityX
@@ -29,9 +36,11 @@ class Fruit:
 
         self.gravity += 0.01    
         self.velocityY -= self.gravity
+        self.currentRotate += self.rotateSpeed
+        self.rotate(self.currentRotate)
 
-    def draw(self, surface):
-        surface.blit(self.fruit, self.rect)
+    def rotate(self, angle):
+        self.fruit = rotate(self.fruit_copy, angle)
 
     def checkBoundary(self):
         if self.rect.y > 875:
